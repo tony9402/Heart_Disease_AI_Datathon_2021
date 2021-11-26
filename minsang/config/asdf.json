@@ -1,0 +1,4 @@
+{
+  "model" : "UNet",
+  "resolution": 128
+}
