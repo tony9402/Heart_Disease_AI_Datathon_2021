@@ -1,5 +1,9 @@
 ### Datas
 data/
+data.csv
+train.csv
+val.csv
+test.csv
 
 ### C++ ###
 # Prerequisites
