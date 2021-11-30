@@ -1,5 +1,6 @@
 ### Datas
 data/
+model_result/
 data.csv
 train.csv
 val.csv
