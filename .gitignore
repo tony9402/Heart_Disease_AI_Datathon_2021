@@ -5,6 +5,7 @@ data.csv
 train.csv
 val.csv
 test.csv
+wandb/
 
 ### C++ ###
 # Prerequisites
