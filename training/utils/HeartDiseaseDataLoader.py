@@ -1,13 +1,24 @@
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 import cv2
 import numpy as np
-from glob import glob
+import pandas as pd
 
+"""
+For DataLoader
+"""
 class HeartDiseaseDataset(Dataset):
-    def __init__(self, path, transforms):
-        files = glob(f"{path}/**/*.*", recursive=True)
-        self.images = sorted([file for file in files if file.endswith('.png')])
-        self.masks = sorted([file for file in files if file.endswith('.npy')])
+    def __init__(self, data, transforms, train = True):
+        data = pd.read_csv(data, header=None)
+
+        self.images = list()
+        self.masks = list()
+
+        if train:
+            self.images = data[data[3] == 'train'].iloc[:, 0].tolist()
+            self.masks = data[data[3] == 'train'].iloc[:, 1].tolist()
+        else:
+            self.images = data[data[3] != 'train'].iloc[:, 0].tolist()
+            self.masks = data[data[3] != 'train'].iloc[:, 1].tolist()
 
         if len(self.images) != len(self.masks):
             raise "len(images) != len(masks)"
@@ -29,4 +40,5 @@ class HeartDiseaseDataset(Dataset):
 
 if __name__ == '__main__':
     # Test Module
-    h = HeartDiseaseDataset('./../../data/train', '')
+    # h = HeartDiseaseDataset('./../../data/train', '')
+    pass
