@@ -63,7 +63,6 @@ class OutConv(nn.Module):
     def forward(self, x):
         return self.conv(x)
 
-
 class Morphology(nn.Module):
     '''
     Base class for morpholigical operators
@@ -144,30 +143,23 @@ class Erosion2d(Morphology):
     def __init__(self, in_channels, out_channels, kernel_size=5, soft_max=True, beta=20):
         super(Erosion2d, self).__init__(in_channels, out_channels, kernel_size, soft_max, beta, 'erosion2d')
 
-class MUNet(nn.Module):
-    def __init__(self, n_channels, n_classes, bilinear=False):
-        super(MUNet, self).__init__()
+class ClosedUNet(nn.Module):
+    def __init__(self, n_channels, n_classes, bilinear=True):
+        super(OpenUNet, self).__init__()
         self.n_channels = n_channels
         self.n_classes = n_classes
         self.bilinear = bilinear
 
         self.inc = DoubleConv(n_channels, 64)
-
         self.down1 = Down(64, 128)
         self.down2 = Down(128, 256)
         self.down3 = Down(256, 512)
-        self.down4 = Down(512, 1024)
-
-        self.up1 = Up(1024, 512, bilinear)
-        self.up2 = Up(512, 256, bilinear)
-        self.up3 = Up(256, 128, bilinear)
+        factor = 2 if bilinear else 1
+        self.down4 = Down(512, 1024 // factor)
+        self.up1 = Up(1024, 512 // factor, bilinear)
+        self.up2 = Up(512, 256 // factor, bilinear)
+        self.up3 = Up(256, 128 // factor, bilinear)
         self.up4 = Up(128, 64, bilinear)
-
-        self.custom_layer = nn.Sequential(
-            nn.Conv2d(in_channels=1024, out_channels=1024, kernel_size=3, padding=1),
-            nn.Dropout(0.2)
-        )
-
         self.outc = OutConv(64, n_classes)
         self.last1 = Dilation2d(n_classes, n_classes)
         self.last2 = Erosion2d(n_classes, n_classes)
@@ -178,7 +170,6 @@ class MUNet(nn.Module):
         x3 = self.down2(x2)
         x4 = self.down3(x3)
         x5 = self.down4(x4)
-        # x5 = self.custom_layer(x5)
         x = self.up1(x5, x4)
         x = self.up2(x, x3)
         x = self.up3(x, x2)
