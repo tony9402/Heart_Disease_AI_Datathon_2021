@@ -42,9 +42,9 @@ def create_val_transforms(size=128):
 def load_args():
     parser = argparse.ArgumentParser()
     arg = parser.add_argument
-    arg('--config', default="UNet2")
+    arg('--config', default="UNet")
     arg('--data', default="/github/data.csv")
-    arg('--model_save', default='/github/model_result/UNet2/')
+    arg('--model_save', default='/github/model_result/UNet/')
     arg('--model_save_prefix', default="UNet_")
     return parser.parse_args()
 
@@ -81,11 +81,8 @@ def main():
             masks = masks.to(device, dtype=torch.float32)
 
             optimizer.zero_grad()
-            # pred = model(images).squeeze(1)
-            pred = model(images)
-            print(pred.shape)
+            pred = model(images).squeeze(1)
             pred = torch.sigmoid(pred)
-            # pred = F.softmax(pred, dim=1).float()
             loss = loss_f(pred, masks)
             current_loss += loss.item()
             pbar.set_postfix({
