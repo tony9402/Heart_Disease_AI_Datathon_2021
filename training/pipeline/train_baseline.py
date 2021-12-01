@@ -24,10 +24,10 @@ def create_train_transforms(size=128):
     return A.Compose([
         A.Resize(width=size, height=size, p=1.0),
         A.HorizontalFlip(p=0.5),
-        A.RandomBrightnessContrast(p=0.5),
+        A.RandomBrightnessContrast(brightness_limit=0.3, contrast_limit=0.09, p=0.2),
+        A.GaussNoise(p=0.3),
         A.RandomGamma(p=0.25),
         A.Blur(p=0.5),
-        A.ElasticTransform(alpha=0.3, p=0.2),
         A.Rotate(15, p=0.5),
         transforms.ToTensorV2()
     ])
@@ -35,13 +35,13 @@ def create_train_transforms(size=128):
 def create_val_transforms(size=128):
     return A.Compose([
         A.Resize(width=size, height=size, p=1.0),
-        A.HorizontalFlip(p=0.5),
         transforms.ToTensorV2()
     ])
 
 def load_args():
     parser = argparse.ArgumentParser()
     arg = parser.add_argument
+    arg('--seed', default=777)
     arg('--config', default="UNet")
     arg('--data', default="/github/data.csv")
     arg('--model_save', default='/github/model_result/UNet/')
@@ -54,6 +54,8 @@ def main():
     args = load_args()
     config = load_config(args.config)
     model_f = get_model(config.model)
+
+    torch.manual_seed(args.seed)
 
     train_dataset = HeartDiseaseDataset(args.data, create_train_transforms(config.size), True)
     val_dataset = HeartDiseaseDataset(args.data, create_val_transforms(config.size), False)
@@ -141,7 +143,9 @@ def main():
         pbar.close()
         wandb.log({
             "DICE": score,
-            "JAC": score / (2 - score)
+            "JAC": score / (2 - score),
+            "best_dice": best_score,
+            "best_jac": best_score / (2 - best_score)
         })
 
         os.makedirs(args.model_save, exist_ok=True)
