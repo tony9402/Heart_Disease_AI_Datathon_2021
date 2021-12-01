@@ -46,6 +46,8 @@ def load_args():
     arg('--data', default="/github/data.csv")
     arg('--model_save', default='/github/model_result/UNet/')
     arg('--model_save_prefix', default="UNet_")
+    arg('--resume', action="store_true")
+    parser.set_defaults(resume=False)
     return parser.parse_args()
 
 def main():
@@ -74,8 +76,10 @@ def main():
     for epoch in range(epochs):
         model.train()
         epoch_loss = 0
-        pbar = tqdm(enumerate(train_loader), total=len(train_loader))
+        pbar = tqdm(enumerate(train_loader), total=len(train_loader), desc=f"Epoch {epoch}")
         current_loss = 0
+        train_dice_score = 0
+        train_jac_score = 0
         for idx, (images, masks) in pbar:
             images = images.to(device, dtype=torch.float32)
             masks = masks.to(device, dtype=torch.float32)
@@ -83,17 +87,30 @@ def main():
             optimizer.zero_grad()
             pred = model(images).squeeze(1)
             pred = torch.sigmoid(pred)
+            current_dice = losses.dice_metric(pred, masks).item()
+            train_dice_score = (train_dice_score * idx + current_dice) / (idx + 1)
+            train_jac_score = train_dice_score / (2 - train_dice_score)
             loss = loss_f(pred, masks)
             current_loss += loss.item()
             pbar.set_postfix({
+                'epoch': epoch,
                 'loss': current_loss / (idx + 1),
-                'lr': f"{scheduler.get_last_lr()[0]:.5f}"
+                'lr': f"{scheduler.get_last_lr()[0]:.5f}",
+                'dice': train_dice_score,
+                'jac': train_jac_score,
+                'best_dice': best_score,
+                'best_jac': best_score / (2 - best_score)
             })
 
-            if (idx + 1) % 50 == 0:
+            if (idx + 1) % 10 == 0:
                 wandb.log({
                     'loss': current_loss / (idx + 1),
-                    'lr': float(scheduler.get_last_lr()[0])
+                    'lr': float(scheduler.get_last_lr()[0]),
+                    'epoch': epoch,
+                    'dice': train_dice_score,
+                    'jac': train_jac_score,
+                    'best_dice': best_score,
+                    'best_jac': best_score / (2 - best_score)
                 })
 
             loss.backward()
