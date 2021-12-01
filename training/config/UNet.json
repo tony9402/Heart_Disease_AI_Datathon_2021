@@ -1,0 +1,25 @@
+{
+    "model": "UNet",
+    "size": 256,
+    "batch_size": 4,
+    "num_workers": 4,
+    "gpus": [0],
+    "optimizer": {
+        "type": "SGD",
+        "weight_decay": 1e-4,
+        "momentum": 0.9,
+        "learning_rate": 0.01,
+        "nesterov": true,
+        "scheduler": {
+            "type": "poly",
+            "epochs": 40,
+            "params": {"max_iter": 16000}
+        }
+    },
+    "model_config": {
+        "n_channels": 3,
+        "n_classes": 1,
+        "bilinear": true
+    },
+    "loss": "bce_dice_loss"
+}
