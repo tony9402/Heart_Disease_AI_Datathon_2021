@@ -10,13 +10,13 @@ cd Heart_Disease_AI_Datathon_2021
 ### Build Dockerfile
 
 ```
-docker build . -t HDAD_docker
+docker build . -t hdad_docker
 ```
 
 ### Run Docker and attach
 
 ```
-docker run -itd --name HDAD --gpus all --net=host --ipc=host -v $(pwd):/github HADA_docker
+docker run -itd --name HDAD --gpus all --net=host --ipc=host -v $(pwd):/github hdad_docker
 docker attach HDAD
 ```
 
