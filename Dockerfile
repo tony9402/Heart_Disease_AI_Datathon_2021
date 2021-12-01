@@ -7,3 +7,6 @@ RUN apt update -y
 RUN apt install libgl1-mesa-glx -y
 
 RUN pip install -r requirements.txt
+
+RUN mkdir -p /github
+WORKDIR /github
