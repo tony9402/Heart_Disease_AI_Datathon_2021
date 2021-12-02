@@ -98,8 +98,8 @@ def main():
                 'epoch': epoch,
                 'loss': current_loss / (idx + 1),
                 'lr': f"{scheduler.get_last_lr()[0]:.5f}",
-                'dice': train_dice_score,
-                'jac': train_jac_score,
+                'train_dice': train_dice_score,
+                'train_jac': train_jac_score,
                 'best_dice': best_score,
                 'best_jac': best_score / (2 - best_score)
             })
@@ -109,8 +109,8 @@ def main():
                     'loss': current_loss / (idx + 1),
                     'lr': float(scheduler.get_last_lr()[0]),
                     'epoch': epoch,
-                    'dice': train_dice_score,
-                    'jac': train_jac_score,
+                    'train_dice': train_dice_score,
+                    'train_jac': train_jac_score,
                     'best_dice': best_score,
                     'best_jac': best_score / (2 - best_score)
                 })
